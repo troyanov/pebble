@@ -19,9 +19,15 @@ import (
 	"os"
 
 	"github.com/canonical/pebble/internals/cli"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 func main() {
+	go func() {
+		fmt.Println(http.ListenAndServe(":6060", nil))
+	}()
+
 	if err := cli.Run(); err != nil {
 		fmt.Fprintf(cli.Stderr, "error: %v\n", err)
 		os.Exit(1)
