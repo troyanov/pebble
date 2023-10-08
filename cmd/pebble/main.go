@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 	"time"
 
 	"net/http"
@@ -41,7 +42,7 @@ func main() {
 		log.Println("trace file", traceFile)
 	}()
 
-	defer trace.Stop()
+	runtime.SetMutexProfileFraction(5)
 	go func() {
 		fmt.Println(http.ListenAndServe(":6060", nil))
 	}()
