@@ -16,14 +16,32 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"time"
 
-	"github.com/canonical/pebble/internals/cli"
 	"net/http"
 	_ "net/http/pprof"
+	"runtime/trace"
+
+	"github.com/canonical/pebble/internals/cli"
 )
 
 func main() {
+	traceFile := fmt.Sprintf("/var/snap/maas/common/pebble/%d.trace", time.Now().UnixNano())
+	f, err := os.Create(traceFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	trace.Start(f)
+	timer := time.NewTimer(5 * time.Minute)
+	go func() {
+		<-timer.C
+		trace.Stop()
+		log.Println("trace file", traceFile)
+	}()
+
+	defer trace.Stop()
 	go func() {
 		fmt.Println(http.ListenAndServe(":6060", nil))
 	}()
